@@ -1,14 +1,14 @@
 const services = {
   social: {
-    kicker: 'Consistent and polished',
-    title: 'Social media design and support',
+    kicker: 'Strategic and polished',
+    title: 'Social media content and ad creative',
     description:
-      'Stay visible with branded content created specifically for your business, promotions, audience, and goals.',
-    list: ['Branded graphics', 'Caption writing', 'Content planning', 'Reels and promotional campaigns'],
+      'Stay visible with branded content and ad creative designed around your audience, promotions, and campaign goals.',
+    list: ['Branded graphics', 'Facebook and Instagram ad creative', 'Content planning', 'Promotional campaigns'],
     theme: 'social-preview',
-    tag: 'NEW POST',
-    headline: 'Your business deserves to be remembered.',
-    button: 'Learn more'
+    tag: 'AD CREATIVE',
+    headline: 'Creative built to stop the scroll.',
+    button: 'Launch campaign'
   },
   graphics: {
     kicker: 'Made for the moment',
