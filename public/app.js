@@ -145,7 +145,20 @@ document.querySelectorAll('.site-nav a').forEach((link) => {
 
 window.addEventListener('scroll', () => {
   header.classList.toggle('scrolled', window.scrollY > 12);
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  document.getElementById('scroll-progress-bar').style.width = `${progress}%`;
 });
+
+const heroVisual = document.querySelector('.hero-visual');
+if (heroVisual && window.matchMedia('(pointer: fine)').matches) {
+  window.addEventListener('pointermove', (event) => {
+    const x = (event.clientX / window.innerWidth - 0.5) * 10;
+    const y = (event.clientY / window.innerHeight - 0.5) * 10;
+    heroVisual.style.setProperty('--pointer-x', `${x}px`);
+    heroVisual.style.setProperty('--pointer-y', `${y}px`);
+  });
+}
 
 const revealObserver = new IntersectionObserver(
   (entries) => {
