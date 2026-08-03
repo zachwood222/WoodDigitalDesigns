@@ -70,10 +70,17 @@ function rateLimited(req) {
   const now = Date.now();
   const key = getClientIp(req);
   const recent = (submissions.get(key) || []).filter((time) => now - time < WINDOW_MS);
-  if (recent.length >= MAX_SUBMISSIONS) return true;
+  if (recent.length) submissions.set(key, recent);
+  else submissions.delete(key);
+  return recent.length >= MAX_SUBMISSIONS;
+}
+
+function recordSubmission(req) {
+  const now = Date.now();
+  const key = getClientIp(req);
+  const recent = (submissions.get(key) || []).filter((time) => now - time < WINDOW_MS);
   recent.push(now);
   submissions.set(key, recent);
-  return false;
 }
 
 function readJsonBody(req) {
@@ -170,6 +177,11 @@ async function handleContact(req, res) {
     return;
   }
 
+  if (!String(req.headers['content-type'] || '').toLowerCase().startsWith('application/json')) {
+    sendJson(res, 415, { ok: false, message: 'Contact requests must use JSON.' });
+    return;
+  }
+
   let body;
   try {
     body = await readJsonBody(req);
@@ -203,6 +215,8 @@ async function handleContact(req, res) {
     return;
   }
 
+  recordSubmission(req);
+
   try {
     const sentByResend = await sendWithResend(inquiry);
     const sentByWebhook = sentByResend ? false : await sendWithWebhook(inquiry);
@@ -228,25 +242,23 @@ async function handleContact(req, res) {
 }
 
 function safeFilePath(urlPath) {
-  const decoded = decodeURIComponent(urlPath);
-  const normalized = path.normalize(decoded).replace(/^(\.\.[/\\])+/, '');
-  const candidate = path.join(PUBLIC_DIR, normalized);
-  return candidate.startsWith(PUBLIC_DIR) ? candidate : null;
+  try {
+    const decoded = decodeURIComponent(urlPath);
+    if (decoded.includes('\0')) return null;
+    const candidate = path.resolve(PUBLIC_DIR, `.${decoded}`);
+    return candidate === PUBLIC_DIR || candidate.startsWith(`${PUBLIC_DIR}${path.sep}`)
+      ? candidate
+      : null;
+  } catch {
+    return null;
+  }
 }
 
-function serveFile(res, filePath, status = 200) {
+function serveFile(req, res, filePath) {
   fs.stat(filePath, (error, stat) => {
     if (error || !stat.isFile()) {
-      const fallback = path.join(PUBLIC_DIR, 'index.html');
-      fs.readFile(fallback, (fallbackError, data) => {
-        if (fallbackError) {
-          res.writeHead(404, securityHeaders());
-          res.end('Not found');
-          return;
-        }
-        res.writeHead(200, securityHeaders('text/html; charset=utf-8'));
-        res.end(data);
-      });
+      res.writeHead(404, securityHeaders());
+      res.end(req.method === 'HEAD' ? undefined : 'Not found');
       return;
     }
 
@@ -254,7 +266,11 @@ function serveFile(res, filePath, status = 200) {
     const contentType = mimeTypes[extension] || 'application/octet-stream';
     const headers = securityHeaders(contentType);
     headers['Cache-Control'] = extension === '.html' ? 'no-cache' : 'public, max-age=86400';
-    res.writeHead(status, headers);
+    res.writeHead(200, headers);
+    if (req.method === 'HEAD') {
+      res.end();
+      return;
+    }
     fs.createReadStream(filePath).pipe(res);
   });
 }
@@ -286,7 +302,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  serveFile(res, filePath);
+  serveFile(req, res, filePath);
 });
 
 server.listen(PORT, '0.0.0.0', () => {

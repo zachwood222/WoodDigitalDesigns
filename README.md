@@ -1,7 +1,3 @@
-# Wood Digital Designs Light Modern Website
-
-Verified clean build based on the white, sage, soft blue, cream, sand, and muted terracotta sample approved on August 3, 2026. Older dark theme override blocks have been removed.
-
 # Wood Digital Designs Web App
 
 A responsive interactive website built with Node.js, HTML, CSS, and vanilla JavaScript. It has no required third party npm packages.
@@ -10,10 +6,8 @@ A responsive interactive website built with Node.js, HTML, CSS, and vanilla Java
 
 * Interactive service selector
 * Four question package finder
-* Editable package pricing
-* Monthly cost estimator
-* Filterable portfolio
 * Responsive mobile navigation
+* Accessible service tabs and four-question package finder
 * Contact form with Resend, Formspree, or another webhook service
 * Render blueprint file
 * Health check endpoint
@@ -74,14 +68,13 @@ CONTACT_WEBHOOK_URL=https://formspree.io/f/your-form-id
 OWNER_EMAIL=your-email@example.com
 ```
 
-Without either delivery method, the website still runs. When `OWNER_EMAIL` is present, the form opens the visitor's email app with the inquiry filled in.
+Without either delivery method, the website still runs and the form explains that delivery is not configured.
 
 ## Main content to edit
 
 * Homepage text: `public/index.html`
 * Colors and layout: `public/styles.css`
-* Quiz logic and estimator: `public/app.js`
-* Package pricing: search for `$300` and `$500` in `public/index.html`
+* Quiz and form logic: `public/app.js`
 * Contact delivery: `server.js`
 
 ## Add real portfolio images
