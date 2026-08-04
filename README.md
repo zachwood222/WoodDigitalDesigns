@@ -33,7 +33,7 @@ To use environment variables locally, start it with your preferred environment m
 
    * Runtime: Node
    * Build command: `npm install`
-   * Start command: `npm start`
+   * Start command: `node server.js`
    * Health check path: `/api/health`
 
 6. Add contact form environment variables if desired.
@@ -41,7 +41,9 @@ To use environment variables locally, start it with your preferred environment m
 
 ### Render Blueprint
 
-The included `render.yaml` can create the web service automatically after the project is connected to GitHub.
+The included `render.yaml` can create the web service automatically after the project is connected to GitHub. It starts the server directly with `node server.js`.
+
+> **If the deploy log says `Running 'npm run'` and then exits:** Render has a dashboard-level Start Command overriding the repository configuration. `npm run` only lists available scripts; it does not start the application. Open the service in Render, go to **Settings → Build & Deploy → Start Command**, set it to `node server.js` (or `npm start`), save, and deploy again. A service created through the Blueprint uses the correct command from `render.yaml` automatically.
 
 ## Contact form setup
 
