@@ -131,6 +131,9 @@ h4 { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
 .button.full { width: 100%; }
 .button.small { min-height: 44px; padding: 9px 18px; }
 .hero-reassurance { max-width: 520px; margin: 12px 0 0; color: #c9c8bb; font-size: 0.88rem; }
+.hero-pulse { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; max-width: 680px; margin-top: 26px; }
+.hero-pulse span { min-height: 70px; display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 1px solid var(--white-line); border-radius: 18px; background: rgba(251, 248, 240, 0.04); color: #dcd9cc; font-size: 0.66rem; font-weight: 900; letter-spacing: 0.12em; line-height: 1.35; text-transform: uppercase; }
+.hero-pulse i { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: var(--clay); box-shadow: 0 0 0 5px rgba(189, 109, 79, 0.16); }
 .hero-points { display: flex; flex-wrap: wrap; gap: 24px; margin: 38px 0 0; padding: 0; list-style: none; color: #aaaD9e; font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; }
 .hero-points li::before { content: "✦"; margin-right: 9px; color: var(--clay); }
 .hero-visual {
@@ -390,6 +393,8 @@ footer { padding: 48px 0; background: var(--ink); color: var(--cream); }
   .site-nav a { min-height: 44px; display: flex; align-items: center; }
   .menu-button { display: block; }
   .hero-grid, .finder-grid, .contact-grid, .proof-grid, .about-grid { grid-template-columns: 1fr; }
+  .hero { padding-block: 75px; }
+  .hero-pulse { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero { padding-block: 56px; }
   .hero-visual { width: min(560px, 80%); margin: 30px auto; }
   .hero-visual .orbit-card { display: none; }
@@ -421,6 +426,8 @@ footer { padding: 48px 0; background: var(--ink); color: var(--cream); }
   .orbit-card { min-width: 105px; padding: 9px; font-size: 0.56rem; }
   .card-a { left: 0; }.card-b { right: 0; }
   .button-row .button { width: 100%; }
+  .hero-pulse { grid-template-columns: 1fr; gap: 8px; }
+  .hero-pulse span { min-height: 56px; }
   .hero-points { gap: 10px; }
   .trust-strip .container { min-height: 0; padding-block: 18px; flex-direction: column; gap: 4px; }
   .trust-strip span + span::before { display: none; }
