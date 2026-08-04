@@ -113,6 +113,7 @@ h4 { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
 .button.secondary { border-color: currentColor; background: transparent; }
 .button.full { width: 100%; }
 .button.small { min-height: 44px; padding: 9px 18px; }
+.hero-reassurance { max-width: 520px; margin: 12px 0 0; color: #c9c8bb; font-size: 0.88rem; }
 .hero-points { display: flex; flex-wrap: wrap; gap: 24px; margin: 38px 0 0; padding: 0; list-style: none; color: #aaaD9e; font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; }
 .hero-points li::before { content: "✦"; margin-right: 9px; color: var(--clay); }
 .hero-visual {
