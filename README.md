@@ -79,15 +79,17 @@ Without either delivery method, the website still runs and the form explains tha
 * Quiz and form logic: `public/app.js`
 * Contact delivery: `server.js`
 
-## Add real portfolio images
+## Replace demonstrations with verified work
 
-The current portfolio uses custom graphic placeholders so the site works immediately without external image hosting. Replace each `.portfolio-art` block in `public/index.html` with your own image tag, then add the images to `public/images`.
+The current work section explicitly presents fictional process demonstrations, with full-size sample campaign boards visitors can inspect. When publication permission is available, replace each demonstration with a verified project card containing the client or industry, original problem, delivered service, measurable result, project image, and a link to the finished work where permitted. Do not publish a metric or testimonial without client approval.
 
 Example:
 
 ```html
 <img src="/images/fowhand-campaign.jpg" alt="Furniture promotion designed by Wood Digital Designs" />
 ```
+
+The testimonial and about sections also contain transparent pending-verification notices. Replace those notices only with approved quotations, attributions, biography details, service area, and a professional portrait.
 
 
 ## Logo files
