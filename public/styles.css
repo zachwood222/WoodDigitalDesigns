@@ -90,7 +90,8 @@ h4 { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
 .menu-button i { display: block; height: 2px; margin: 5px 0; background: var(--cream); }
 
 .hero {
-  position: relative; min-height: calc(100svh - 82px); display: flex; align-items: center;
+  position: relative; min-height: min(760px, calc(100svh - 82px)); display: flex; align-items: center;
+  padding-block: clamp(56px, 8vw, 96px);
   overflow: hidden; background: var(--ink); color: var(--cream);
 }
 .hero::before {
@@ -105,7 +106,7 @@ h4 { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
   pointer-events: none;
 }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(340px, 0.78fr); align-items: center; gap: clamp(50px, 8vw, 120px); }
-.hero h1 { max-width: 9.5ch; }
+.hero h1 { max-width: 14ch; }
 .eyebrow { margin-bottom: 18px; color: var(--clay); font-size: 0.7rem; font-weight: 900; letter-spacing: 0.2em; text-transform: uppercase; }
 .hero-text, .section-heading > p { max-width: 650px; color: #c9c8bb; font-size: clamp(1rem, 1.5vw, 1.25rem); }
 .button-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
@@ -317,7 +318,7 @@ footer { padding: 48px 0; background: var(--ink); color: var(--cream); }
   .site-nav a { min-height: 44px; display: flex; align-items: center; }
   .menu-button { display: block; }
   .hero-grid, .finder-grid, .contact-grid, .proof-grid, .about-grid { grid-template-columns: 1fr; }
-  .hero { padding-block: 75px; }
+  .hero { padding-block: 56px; }
   .hero-visual { width: min(560px, 80%); margin: 30px auto; }
   .hero-visual .orbit-card { display: none; }
   .case-grid, .pricing-grid { grid-template-columns: 1fr; }
