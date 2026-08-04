@@ -240,11 +240,14 @@ h4 { font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .contact-form > label, .contact-form > fieldset, .contact-form > .form-grid { margin-bottom: 24px; }
 .contact-form fieldset { padding: 0; border: 0; }
-.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-.checkbox-grid label { min-height: 48px; display: flex; align-items: center; gap: 9px; padding: 10px 12px; border: 1px solid var(--line); font-size: 0.67rem; }
-.checkbox-grid input { width: 18px; min-height: 18px; margin: 0; }
+.optional-fields { margin: 0 0 24px; border-block: 1px solid var(--line); }
+.optional-fields summary { padding: 16px 0; cursor: pointer; font-weight: 800; }
+.optional-fields summary span, .optional-fields label span { font-weight: 500; text-transform: none; letter-spacing: 0; }
+.optional-fields-content { padding: 8px 0 2px; }
+.optional-fields-content > label, .optional-fields-content > .form-grid { margin-bottom: 24px; }
 .honeypot { position: absolute; left: -9999px; }
 .form-status { min-height: 24px; margin: 14px 0 0; }
+.form-reassurance { margin: 14px 0 0; font-size: .82rem; line-height: 1.55; color: var(--muted); }
 .form-status.error { color: #9b2f27; }.form-status.success { color: #285f35; }
 footer { padding: 48px 0; background: var(--ink); color: var(--cream); }
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr auto; align-items: center; gap: 30px; }
@@ -301,10 +304,9 @@ footer { padding: 48px 0; background: var(--ink); color: var(--cream); }
   .service-intro { grid-template-columns: 1fr; gap: 5px; }
   .detail-grid { grid-template-columns: 1fr; }
   .detail-grid > div { min-height: 0; border-right: 0; border-bottom: 1px solid var(--line); }
-  .case-art { aspect-ratio: 4 / 5; }
-  .social-art { background-position: 62% center; }
-  .web-art { background-position: 45% center; }
-  .process-list, .form-grid, .checkbox-grid, .footer-grid { grid-template-columns: 1fr; }
+  .case-art { min-height: 380px; }
+  .case-copy { min-height: 0; }
+  .process-list, .form-grid, .footer-grid { grid-template-columns: 1fr; }
   .process-list li { min-height: 235px; border-right: 0; }
   .process-list span { margin-bottom: 35px; }
   .footer-grid > :last-child { grid-column: auto; }
