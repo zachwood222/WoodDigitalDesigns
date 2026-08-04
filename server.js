@@ -113,17 +113,18 @@ function readJsonBody(req) {
 async function sendWithResend(inquiry) {
   if (!process.env.RESEND_API_KEY || !process.env.OWNER_EMAIL) return false;
 
-  const serviceList = inquiry.services.length ? inquiry.services.join(', ') : 'Not selected';
-  const text = [
+  const details = [
     `Name: ${inquiry.name}`,
     `Email: ${inquiry.email}`,
-    `Business: ${inquiry.business || 'Not provided'}`,
-    `Services: ${serviceList}`,
-    `Budget: ${inquiry.budget || 'Not provided'}`,
-    '',
-    'Project details:',
-    inquiry.message
-  ].join('\n');
+    `Service: ${inquiry.service}`,
+    inquiry.business && `Business: ${inquiry.business}`,
+    inquiry.businessType && `Business type: ${inquiry.businessType}`,
+    inquiry.location && `Location/service area: ${inquiry.location}`,
+    inquiry.budget && `Budget: ${inquiry.budget}`,
+    inquiry.timeline && `Timeline: ${inquiry.timeline}`
+  ].filter(Boolean);
+  if (inquiry.message) details.push('', 'Project details:', inquiry.message);
+  const text = details.join('\n');
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -193,11 +194,12 @@ async function handleContact(req, res) {
   const inquiry = {
     name: clean(body.name, 100),
     email: clean(body.email, 200).toLowerCase(),
+    service: clean(body.service, 100),
     business: clean(body.business, 150),
-    services: Array.isArray(body.services)
-      ? body.services.map((service) => clean(service, 100)).slice(0, 10)
-      : [],
+    businessType: clean(body.businessType, 150),
+    location: clean(body.location, 200),
     budget: clean(body.budget, 100),
+    timeline: clean(body.timeline, 100),
     message: clean(body.message, 2000),
     website: clean(body.website, 200)
   };
@@ -207,10 +209,10 @@ async function handleContact(req, res) {
     return;
   }
 
-  if (!inquiry.name || !validEmail(inquiry.email) || !inquiry.message) {
+  if (!inquiry.name || !validEmail(inquiry.email) || !inquiry.service) {
     sendJson(res, 400, {
       ok: false,
-      message: 'Please enter your name, a valid email, and a short project description.'
+      message: 'Please enter your name, a valid email, and select a service.'
     });
     return;
   }
