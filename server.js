@@ -8,6 +8,7 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const MAX_BODY_SIZE = 50 * 1024;
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_SUBMISSIONS = 5;
+const DEFAULT_OWNER_EMAIL = 'webguypc@gmail.com';
 const submissions = new Map();
 
 const mimeTypes = {
@@ -110,8 +111,13 @@ function readJsonBody(req) {
   });
 }
 
+function ownerEmail() {
+  return clean(process.env.OWNER_EMAIL || DEFAULT_OWNER_EMAIL, 200).toLowerCase();
+}
+
 async function sendWithResend(inquiry) {
-  if (!process.env.RESEND_API_KEY || !process.env.OWNER_EMAIL) return false;
+  const toEmail = ownerEmail();
+  if (!process.env.RESEND_API_KEY || !toEmail) return false;
 
   const details = [
     `Name: ${inquiry.name}`,
@@ -134,7 +140,7 @@ async function sendWithResend(inquiry) {
     },
     body: JSON.stringify({
       from: process.env.FROM_EMAIL || 'Wood Digital Designs <onboarding@resend.dev>',
-      to: [process.env.OWNER_EMAIL],
+      to: [toEmail],
       reply_to: inquiry.email,
       subject: `New Wood Digital Designs inquiry from ${inquiry.name}`,
       text
@@ -144,6 +150,40 @@ async function sendWithResend(inquiry) {
   if (!response.ok) {
     const message = await response.text();
     throw new Error(`Resend rejected the message: ${message.slice(0, 300)}`);
+  }
+
+  return true;
+}
+
+async function sendWithFormSubmit(inquiry) {
+  const toEmail = ownerEmail();
+  if (!toEmail) return false;
+
+  const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(toEmail)}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: JSON.stringify({
+      _subject: `New Wood Digital Designs inquiry from ${inquiry.name}`,
+      _template: 'table',
+      _captcha: 'false',
+      name: inquiry.name,
+      email: inquiry.email,
+      service: inquiry.service,
+      business: inquiry.business,
+      businessType: inquiry.businessType,
+      location: inquiry.location,
+      budget: inquiry.budget,
+      timeline: inquiry.timeline,
+      message: inquiry.message
+    })
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`FormSubmit rejected the message: ${message.slice(0, 300)}`);
   }
 
   return true;
@@ -222,8 +262,9 @@ async function handleContact(req, res) {
   try {
     const sentByResend = await sendWithResend(inquiry);
     const sentByWebhook = sentByResend ? false : await sendWithWebhook(inquiry);
+    const sentByFormSubmit = sentByResend || sentByWebhook ? false : await sendWithFormSubmit(inquiry);
 
-    if (sentByResend || sentByWebhook) {
+    if (sentByResend || sentByWebhook || sentByFormSubmit) {
       sendJson(res, 200, { ok: true, message: 'Thank you. Your inquiry has been sent.' });
       return;
     }
@@ -231,7 +272,7 @@ async function handleContact(req, res) {
     sendJson(res, 503, {
       ok: false,
       fallback: true,
-      ownerEmail: process.env.OWNER_EMAIL || '',
+      ownerEmail: ownerEmail(),
       message: 'Contact delivery is not configured yet.'
     });
   } catch (error) {
