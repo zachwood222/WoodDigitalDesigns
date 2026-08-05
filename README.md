@@ -8,7 +8,7 @@ A responsive interactive website built with Node.js, HTML, CSS, and vanilla Java
 * Four question package finder
 * Responsive mobile navigation
 * Accessible service tabs and four-question package finder
-* Contact form with Resend, Formspree, or another webhook service
+* Contact form sent to webguypc@gmail.com with optional Resend or webhook overrides
 * Render blueprint file
 * Health check endpoint
 
@@ -47,14 +47,14 @@ The included `render.yaml` can create the web service automatically after the pr
 
 ## Contact form setup
 
-The site supports two delivery methods. Resend is checked first. A webhook is used second.
+The site sends contact submissions to `webguypc@gmail.com` by default. Resend is checked first when configured, a webhook is used second, and the built-in FormSubmit fallback sends to the default owner email when no provider-specific environment variables are present.
 
 ### Resend
 
 Add these values in Render under **Environment**:
 
 ```env
-OWNER_EMAIL=your-email@example.com
+OWNER_EMAIL=webguypc@gmail.com
 FROM_EMAIL=Wood Digital Designs <hello@yourdomain.com>
 RESEND_API_KEY=re_your_api_key
 ```
@@ -67,10 +67,10 @@ Add the form endpoint as:
 
 ```env
 CONTACT_WEBHOOK_URL=https://formspree.io/f/your-form-id
-OWNER_EMAIL=your-email@example.com
+OWNER_EMAIL=webguypc@gmail.com
 ```
 
-Without either delivery method, the website still runs and the form explains that delivery is not configured.
+If you want to send inquiries somewhere else later, change `OWNER_EMAIL`; otherwise no email environment variable is required for the default `webguypc@gmail.com` delivery address.
 
 ## Main content to edit
 
