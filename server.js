@@ -318,6 +318,16 @@ function serveFile(req, res, filePath) {
   });
 }
 
+function resolvePublicFile(urlPath) {
+  const direct = safeFilePath(urlPath);
+  if (direct && fs.existsSync(direct) && fs.statSync(direct).isFile()) return direct;
+  if (!path.extname(urlPath)) {
+    const html = safeFilePath(`${urlPath}.html`);
+    if (html && fs.existsSync(html) && fs.statSync(html).isFile()) return html;
+  }
+  return null;
+}
+
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
@@ -337,11 +347,15 @@ const server = http.createServer(async (req, res) => {
   }
 
   const requestPath = parsedUrl.pathname === '/' ? '/index.html' : parsedUrl.pathname;
-  const filePath = safeFilePath(requestPath);
+  const filePath = resolvePublicFile(requestPath);
 
   if (!filePath) {
-    res.writeHead(400, securityHeaders());
-    res.end('Bad request');
+    const badRequest = safeFilePath(requestPath) === null;
+    const notFoundPage = path.join(PUBLIC_DIR, '404.html');
+    res.writeHead(badRequest ? 400 : 404, securityHeaders('text/html; charset=utf-8'));
+    if (req.method === 'HEAD') res.end();
+    else if (!badRequest && fs.existsSync(notFoundPage)) fs.createReadStream(notFoundPage).pipe(res);
+    else res.end('Bad request');
     return;
   }
 
