@@ -209,6 +209,26 @@ async function sendWithWebhook(inquiry) {
   return true;
 }
 
+async function deliverInquiry(inquiry) {
+  const providers = [
+    ['Resend', sendWithResend],
+    ['contact webhook', sendWithWebhook],
+    ['FormSubmit', sendWithFormSubmit]
+  ];
+  const errors = [];
+
+  for (const [name, send] of providers) {
+    try {
+      if (await send(inquiry)) return { sent: true, provider: name, errors };
+    } catch (error) {
+      errors.push({ provider: name, message: error.message });
+      console.error(`${name} contact delivery failed:`, error.message);
+    }
+  }
+
+  return { sent: false, provider: null, errors };
+}
+
 async function handleContact(req, res) {
   if (rateLimited(req)) {
     sendJson(res, 429, {
@@ -259,29 +279,18 @@ async function handleContact(req, res) {
 
   recordSubmission(req);
 
-  try {
-    const sentByResend = await sendWithResend(inquiry);
-    const sentByWebhook = sentByResend ? false : await sendWithWebhook(inquiry);
-    const sentByFormSubmit = sentByResend || sentByWebhook ? false : await sendWithFormSubmit(inquiry);
-
-    if (sentByResend || sentByWebhook || sentByFormSubmit) {
-      sendJson(res, 200, { ok: true, message: 'Thank you. Your inquiry has been sent.' });
-      return;
-    }
-
-    sendJson(res, 503, {
-      ok: false,
-      fallback: true,
-      ownerEmail: ownerEmail(),
-      message: 'Contact delivery is not configured yet.'
-    });
-  } catch (error) {
-    console.error('Contact form error:', error.message);
-    sendJson(res, 500, {
-      ok: false,
-      message: 'Your inquiry could not be sent. Please try again or email us directly.'
-    });
+  const delivery = await deliverInquiry(inquiry);
+  if (delivery.sent) {
+    sendJson(res, 200, { ok: true, message: 'Thank you. Your inquiry has been sent.' });
+    return;
   }
+
+  sendJson(res, 502, {
+    ok: false,
+    fallback: true,
+    ownerEmail: ownerEmail(),
+    message: 'Email delivery is temporarily unavailable.'
+  });
 }
 
 function safeFilePath(urlPath) {
@@ -362,6 +371,10 @@ const server = http.createServer(async (req, res) => {
   serveFile(req, res, filePath);
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Wood Digital Designs running on port ${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Wood Digital Designs running on port ${PORT}`);
+  });
+}
+
+module.exports = { deliverInquiry, server };
