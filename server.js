@@ -38,7 +38,7 @@ function securityHeaders(contentType = 'text/plain; charset=utf-8') {
       "img-src 'self' data:",
       "font-src 'self'",
       "connect-src 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://formsubmit.co",
       "base-uri 'self'",
       "frame-ancestors 'none'"
     ].join('; ')
@@ -155,40 +155,6 @@ async function sendWithResend(inquiry) {
   return true;
 }
 
-async function sendWithFormSubmit(inquiry) {
-  const toEmail = ownerEmail();
-  if (!toEmail) return false;
-
-  const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(toEmail)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    body: JSON.stringify({
-      _subject: `New Wood Digital Designs inquiry from ${inquiry.name}`,
-      _template: 'table',
-      _captcha: 'false',
-      name: inquiry.name,
-      email: inquiry.email,
-      service: inquiry.service,
-      business: inquiry.business,
-      businessType: inquiry.businessType,
-      location: inquiry.location,
-      budget: inquiry.budget,
-      timeline: inquiry.timeline,
-      message: inquiry.message
-    })
-  });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(`FormSubmit rejected the message: ${message.slice(0, 300)}`);
-  }
-
-  return true;
-}
-
 async function sendWithWebhook(inquiry) {
   if (!process.env.CONTACT_WEBHOOK_URL) return false;
 
@@ -207,6 +173,25 @@ async function sendWithWebhook(inquiry) {
   }
 
   return true;
+}
+
+async function deliverInquiry(inquiry) {
+  const providers = [
+    ['Resend', sendWithResend],
+    ['contact webhook', sendWithWebhook]
+  ];
+  const errors = [];
+
+  for (const [name, send] of providers) {
+    try {
+      if (await send(inquiry)) return { sent: true, provider: name, errors };
+    } catch (error) {
+      errors.push({ provider: name, message: error.message });
+      console.error(`${name} contact delivery failed:`, error.message);
+    }
+  }
+
+  return { sent: false, provider: null, errors };
 }
 
 async function handleContact(req, res) {
@@ -259,29 +244,19 @@ async function handleContact(req, res) {
 
   recordSubmission(req);
 
-  try {
-    const sentByResend = await sendWithResend(inquiry);
-    const sentByWebhook = sentByResend ? false : await sendWithWebhook(inquiry);
-    const sentByFormSubmit = sentByResend || sentByWebhook ? false : await sendWithFormSubmit(inquiry);
-
-    if (sentByResend || sentByWebhook || sentByFormSubmit) {
-      sendJson(res, 200, { ok: true, message: 'Thank you. Your inquiry has been sent.' });
-      return;
-    }
-
-    sendJson(res, 503, {
-      ok: false,
-      fallback: true,
-      ownerEmail: ownerEmail(),
-      message: 'Contact delivery is not configured yet.'
-    });
-  } catch (error) {
-    console.error('Contact form error:', error.message);
-    sendJson(res, 500, {
-      ok: false,
-      message: 'Your inquiry could not be sent. Please try again or email us directly.'
-    });
+  const delivery = await deliverInquiry(inquiry);
+  if (delivery.sent) {
+    sendJson(res, 200, { ok: true, message: 'Thank you. Your inquiry has been sent.' });
+    return;
   }
+
+  sendJson(res, 502, {
+    ok: false,
+    fallback: true,
+    browserFallback: 'formsubmit',
+    ownerEmail: ownerEmail(),
+    message: 'Secure email delivery is continuing in your browser.'
+  });
 }
 
 function safeFilePath(urlPath) {
@@ -362,6 +337,10 @@ const server = http.createServer(async (req, res) => {
   serveFile(req, res, filePath);
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Wood Digital Designs running on port ${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Wood Digital Designs running on port ${PORT}`);
+  });
+}
+
+module.exports = { deliverInquiry, server };
