@@ -8,12 +8,12 @@ const inquiry = {
   service: 'Website Design'
 };
 
-test('falls back to FormSubmit when configured Resend delivery fails', { concurrency: false }, async (t) => {
+test('falls back to the next configured server provider when Resend fails', { concurrency: false }, async (t) => {
   const originalFetch = global.fetch;
   const originalKey = process.env.RESEND_API_KEY;
   const originalWebhook = process.env.CONTACT_WEBHOOK_URL;
   process.env.RESEND_API_KEY = 'invalid-test-key';
-  delete process.env.CONTACT_WEBHOOK_URL;
+  process.env.CONTACT_WEBHOOK_URL = 'https://example.com/contact';
 
   t.after(() => {
     global.fetch = originalFetch;
@@ -37,7 +37,7 @@ test('falls back to FormSubmit when configured Resend delivery fails', { concurr
 
   const result = await deliverInquiry(inquiry);
   assert.equal(result.sent, true);
-  assert.equal(result.provider, 'FormSubmit');
+  assert.equal(result.provider, 'contact webhook');
   assert.equal(requests.length, 2);
 });
 
@@ -64,6 +64,6 @@ test('reports failure only after every available provider has been tried', { con
 
   const result = await deliverInquiry(inquiry);
   assert.equal(result.sent, false);
-  assert.equal(attempts, 3);
-  assert.equal(result.errors.length, 3);
+  assert.equal(attempts, 2);
+  assert.equal(result.errors.length, 2);
 });

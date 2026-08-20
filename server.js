@@ -38,7 +38,7 @@ function securityHeaders(contentType = 'text/plain; charset=utf-8') {
       "img-src 'self' data:",
       "font-src 'self'",
       "connect-src 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://formsubmit.co",
       "base-uri 'self'",
       "frame-ancestors 'none'"
     ].join('; ')
@@ -155,40 +155,6 @@ async function sendWithResend(inquiry) {
   return true;
 }
 
-async function sendWithFormSubmit(inquiry) {
-  const toEmail = ownerEmail();
-  if (!toEmail) return false;
-
-  const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(toEmail)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    body: JSON.stringify({
-      _subject: `New Wood Digital Designs inquiry from ${inquiry.name}`,
-      _template: 'table',
-      _captcha: 'false',
-      name: inquiry.name,
-      email: inquiry.email,
-      service: inquiry.service,
-      business: inquiry.business,
-      businessType: inquiry.businessType,
-      location: inquiry.location,
-      budget: inquiry.budget,
-      timeline: inquiry.timeline,
-      message: inquiry.message
-    })
-  });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(`FormSubmit rejected the message: ${message.slice(0, 300)}`);
-  }
-
-  return true;
-}
-
 async function sendWithWebhook(inquiry) {
   if (!process.env.CONTACT_WEBHOOK_URL) return false;
 
@@ -212,8 +178,7 @@ async function sendWithWebhook(inquiry) {
 async function deliverInquiry(inquiry) {
   const providers = [
     ['Resend', sendWithResend],
-    ['contact webhook', sendWithWebhook],
-    ['FormSubmit', sendWithFormSubmit]
+    ['contact webhook', sendWithWebhook]
   ];
   const errors = [];
 
@@ -288,8 +253,9 @@ async function handleContact(req, res) {
   sendJson(res, 502, {
     ok: false,
     fallback: true,
+    browserFallback: 'formsubmit',
     ownerEmail: ownerEmail(),
-    message: 'Email delivery is temporarily unavailable.'
+    message: 'Secure email delivery is continuing in your browser.'
   });
 }
 

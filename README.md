@@ -47,7 +47,7 @@ The included `render.yaml` can create the web service automatically after the pr
 
 ## Contact form setup
 
-The site sends contact submissions to `webguypc@gmail.com` by default. Resend is checked first when configured, a webhook is used second, and the built-in FormSubmit fallback sends to the default owner email when no provider-specific environment variables are present.
+The site sends contact submissions to `webguypc@gmail.com` by default. Resend is checked first when configured and a webhook is used second. If neither server-side provider succeeds, the browser submits the completed form directly to FormSubmit. This avoids hosting-provider requests being mistaken for automated traffic by FormSubmit's Cloudflare protection.
 
 ### Resend
 
