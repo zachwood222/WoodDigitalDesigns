@@ -37,7 +37,7 @@ function securityHeaders(contentType = 'text/plain; charset=utf-8') {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data:",
       "font-src 'self'",
-      "connect-src 'self'",
+      "connect-src 'self' https://formsubmit.co",
       "form-action 'self' https://formsubmit.co",
       "base-uri 'self'",
       "frame-ancestors 'none'"
